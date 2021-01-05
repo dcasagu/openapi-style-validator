@@ -64,8 +64,17 @@ class ErrorAggregator {
                 String.format("%s should be in %s", variableType, neededNamingStrategy), path, httpMethod));
     }
 
+    void logOperationNonUniqueNaming(String operationName, String operationId, String path, PathItem.HttpMethod httpMethod) {
+        errorList.add(new OperationNamingStyleError(StyleError.StyleCheckSection.Naming, operationName,
+                String.format("%s should be UNIQUE", operationId), path, httpMethod));
+    }
+
     void logModelBadNaming(String variableName, String variableType, String neededNamingStrategy, String model) {
         errorList.add(new ModelNamingStyleError(StyleError.StyleCheckSection.Naming, variableName,
                 String.format("%s should be in %s", variableType, neededNamingStrategy), model));
+    }
+
+    void logMissingOrEmptyServerAttribute(String url, String attribute) {
+        errorList.add(new StyleError(StyleError.StyleCheckSection.APIInfo, "server", String.format("server url has missing attribute {%s}", attribute)));
     }
 }

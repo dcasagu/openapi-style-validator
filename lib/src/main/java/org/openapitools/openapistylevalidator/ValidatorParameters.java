@@ -4,8 +4,10 @@ public class ValidatorParameters {
     public static final String VALIDATE_INFO_LICENSE = "validateInfoLicense";
     public static final String VALIDATE_INFO_DESCRIPTION = "validateInfoDescription";
     public static final String VALIDATE_INFO_CONTACT = "validateInfoContact";
+    public static final String VALIDATE_SERVER_INFO = "validateServerInfo";
 
     public static final String VALIDATE_OPERATION_OPERATION_ID = "validateOperationOperationId";
+    public static final String VALIDATE_OPERATION_OPERATION_ID_UNIQUE = "validateOperationOperationIdUnique";
     public static final String VALIDATE_OPERATION_DESCRIPTION = "validateOperationDescription";
     public static final String VALIDATE_OPERATION_TAG = "validateOperationTag";
     public static final String VALIDATE_OPERATION_SUMMARY = "validateOperationSummary";
@@ -18,6 +20,7 @@ public class ValidatorParameters {
     public static final String PATH_NAMING_CONVENTION = "pathNamingConvention";
     public static final String PARAMETER_NAMING_CONVENTION = "parameterNamingConvention";
     public static final String PROPERTY_NAMING_CONVENTION = "propertyNamingConvention";
+    public static final String UPDATED_SERVER_URL_TLDS = "updatedServerUrlTLDs";
 
     public static enum NamingConvention {
         UnderscoreCase("underscore_case"),
@@ -75,7 +78,10 @@ public class ValidatorParameters {
     private boolean validateInfoDescription = true;
     private boolean validateInfoContact = true;
 
+    private boolean validateServerInfo = true;
+
     private boolean validateOperationOperationId = true;
+    private boolean validateOperationOperationIdUnique = true;
     private boolean validateOperationDescription = true;
     private boolean validateOperationTag = true;
     private boolean validateOperationSummary = true;
@@ -88,6 +94,7 @@ public class ValidatorParameters {
     private NamingConvention pathNamingConvention = NamingConvention.HyphenCase;
     private NamingConvention parameterNamingConvention = NamingConvention.CamelCase;
     private NamingConvention propertyNamingConvention= NamingConvention.CamelCase;
+    private String[] updatedServerUrlTLDs = {}; // @see commons-validator DomainValidator.updateTLDOverride
 
     public ValidatorParameters() {
         //For Gson
@@ -109,6 +116,10 @@ public class ValidatorParameters {
         return validateOperationOperationId;
     }
 
+    public boolean isValidateOperationOperationIdUnique() {
+        return validateOperationOperationIdUnique;
+    }
+
     public boolean isValidateOperationDescription() {
         return validateOperationDescription;
     }
@@ -128,6 +139,8 @@ public class ValidatorParameters {
     public boolean isValidateModelNoLocalDef() {
         return validateModelNoLocalDef;
     }
+
+    public boolean isValidateServerInfo() { return validateServerInfo; }
 
     public NamingConvention getPathNamingConvention() {
         return pathNamingConvention;
@@ -153,6 +166,8 @@ public class ValidatorParameters {
         return NamingStrategy.valueOf(getPropertyNamingConvention());
     }
 
+    public String[] getUpdatedServerUrlTLDs() {return updatedServerUrlTLDs; }
+
     public ValidatorParameters setValidateInfoLicense(boolean validateInfoLicense) {
         this.validateInfoLicense = validateInfoLicense;
         return this;
@@ -168,8 +183,18 @@ public class ValidatorParameters {
         return this;
     }
 
+    public ValidatorParameters setValidatorServerInfo(boolean validateServerInfo){
+        this.validateServerInfo = validateServerInfo;
+        return this;
+    }
+
     public ValidatorParameters setValidateOperationOperationId(boolean validateOperationOperationId) {
         this.validateOperationOperationId = validateOperationOperationId;
+        return this;
+    }
+
+    public ValidatorParameters setValidateOperationOperationIdUnique(boolean validateOperationOperationIdUnique) {
+        this.validateOperationOperationIdUnique = validateOperationOperationIdUnique;
         return this;
     }
 
@@ -228,6 +253,11 @@ public class ValidatorParameters {
         return this;
     }
 
+    public ValidatorParameters setUpdatedServerUrlTLDs(String[] updatedServerUrlTLDs) {
+        this.updatedServerUrlTLDs = updatedServerUrlTLDs;
+        return this;
+    }
+
     public boolean isValidateNaming() {
         return validateNaming;
     }
@@ -249,11 +279,13 @@ public class ValidatorParameters {
     @Override
     public String toString() {
         return String.format(
-                "ValidatorParameters [validateInfoLicense=%s, validateInfoDescription=%s, validateInfoContact=%s, validateOperationOperationId=%s, validateOperationDescription=%s, validateOperationTag=%s, validateOperationSummary=%s, validateModelPropertiesExample=%s, validateModelNoLocalDef=%s, validateNaming=%s, ignoreHeaderXNaming=%s, pathNamingConvention=%s, parameterNamingConvention=%s, propertyNamingConvention=%s]",
+                "ValidatorParameters [validateInfoLicense=%s, validateInfoDescription=%s, validateInfoContact=%s, validateServerInfo=%s, validateOperationOperationId=%s, validateOperationOperationIdUnique=%s, validateOperationDescription=%s, validateOperationTag=%s, validateOperationSummary=%s, validateModelPropertiesExample=%s, validateModelNoLocalDef=%s, validateNaming=%s, ignoreHeaderXNaming=%s, pathNamingConvention=%s, parameterNamingConvention=%s, propertyNamingConvention=%s]",
                 validateInfoLicense, 
                 validateInfoDescription, 
-                validateInfoContact, 
-                validateOperationOperationId, 
+                validateInfoContact,
+                validateServerInfo,
+                validateOperationOperationId,
+                validateOperationOperationIdUnique,
                 validateOperationDescription,
                 validateOperationTag, 
                 validateOperationSummary,

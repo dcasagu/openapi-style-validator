@@ -33,8 +33,14 @@ public class OpenAPIStyleValidatorMojo extends AbstractMojo {
     @Parameter(property = ValidatorParameters.VALIDATE_INFO_CONTACT, defaultValue = "true")
     private boolean validateInfoContact = true;
 
+    @Parameter(property = ValidatorParameters.VALIDATE_SERVER_INFO, defaultValue = "true")
+    private boolean validateServerInfo = true;
+
     @Parameter(property = ValidatorParameters.VALIDATE_OPERATION_OPERATION_ID, defaultValue = "true")
     private boolean validateOperationOperationId = true;
+
+    @Parameter(property = ValidatorParameters.VALIDATE_OPERATION_OPERATION_ID_UNIQUE, defaultValue = "true")
+    private boolean validateOperationOperationIdUnique = true;
 
     @Parameter(property = ValidatorParameters.VALIDATE_OPERATION_DESCRIPTION, defaultValue = "true")
     private boolean validateOperationDescription = true;
@@ -65,6 +71,10 @@ public class OpenAPIStyleValidatorMojo extends AbstractMojo {
 
     @Parameter(property = ValidatorParameters.PROPERTY_NAMING_CONVENTION, defaultValue = "CamelCase")
     private NamingConvention propertyNamingConvention = NamingConvention.CamelCase;
+
+    @Parameter(property = ValidatorParameters.UPDATED_SERVER_URL_TLDS)
+    private String[] updatedServerUrlTLDs;
+
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -98,7 +108,9 @@ public class OpenAPIStyleValidatorMojo extends AbstractMojo {
         parameters.setValidateInfoLicense(validateInfoLicense);
         parameters.setValidateInfoDescription(validateInfoDescription);
         parameters.setValidateInfoContact(validateInfoContact);
+        parameters.setValidatorServerInfo(validateServerInfo);
         parameters.setValidateOperationOperationId(validateOperationOperationId);
+        parameters.setValidateOperationOperationId(validateOperationOperationIdUnique);
         parameters.setValidateOperationDescription(validateOperationDescription);
         parameters.setValidateOperationTag(validateOperationTag);
         parameters.setValidateOperationSummary(validateOperationSummary);
@@ -109,6 +121,7 @@ public class OpenAPIStyleValidatorMojo extends AbstractMojo {
         parameters.setPathNamingConvention(pathNamingConvention);
         parameters.setParameterNamingConvention(parameterNamingConvention);
         parameters.setPropertyNamingConvention(propertyNamingConvention);
+        parameters.setUpdatedServerUrlTLDs(updatedServerUrlTLDs);
         return parameters;
     }
 }

@@ -1,5 +1,9 @@
 package org.openapitools.openapistylevalidator;
 
+import org.apache.commons.validator.routines.DomainValidator;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.eclipse.microprofile.openapi.models.servers.Server;
+import org.eclipse.microprofile.openapi.models.servers.ServerVariable;
 import org.openapitools.openapistylevalidator.styleerror.StyleError;
 import org.eclipse.microprofile.openapi.models.OpenAPI;
 import org.eclipse.microprofile.openapi.models.Operation;
@@ -10,10 +14,9 @@ import org.eclipse.microprofile.openapi.models.info.License;
 import org.eclipse.microprofile.openapi.models.media.Schema;
 import org.eclipse.microprofile.openapi.models.parameters.Parameter;
 
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class OpenApiSpecStyleValidator {
     public static final String INPUT_FILE = "inputFile";
@@ -32,11 +35,48 @@ public class OpenApiSpecStyleValidator {
     public List<StyleError> validate(ValidatorParameters parameters) {
         this.parameters = parameters;
         validateInfo();
+        validateServers();
         validateOperations();
         validateModels();
         validateNaming();
 
         return errorAggregator.getErrorList();
+    }
+    
+    private void validateServers() {
+        List<Server> servers = openAPI.getServers();
+        if (servers != null && parameters.isValidateServerInfo()) {
+
+            String[] updateServerTLDs = parameters.getUpdatedServerUrlTLDs();
+            if(updateServerTLDs != null && updateServerTLDs.length > 0){
+                DomainValidator.updateTLDOverride(DomainValidator.ArrayType.GENERIC_PLUS, updateServerTLDs);
+            }
+
+            Pattern p = Pattern.compile("\\{(.*?)\\}");
+
+            servers.forEach(server -> {
+                errorAggregator.getErrorList().add(new StyleError(StyleError.StyleCheckSection.APIInfo, "server", "server:" + server));
+                StringBuffer sb = new StringBuffer();
+                Matcher m = p.matcher(server.getUrl());
+                while(m.find()) {
+                    String parameterName = m.group(1);
+                    ServerVariable serverVariable = server.getVariables() != null?
+                                                        server.getVariables().getServerVariable(parameterName):null;
+                    if(serverVariable == null){
+                        errorAggregator.logMissingOrEmptyServerAttribute(server.getUrl(), parameterName);
+                    }
+                    else {
+                        m.appendReplacement(sb, serverVariable.getDefaultValue());
+                    }
+                }
+                m.appendTail(sb);
+                String url = sb.toString();
+                UrlValidator urlValidator = new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS);
+                if (!"/".equals(url) && !urlValidator.isValid(url)) {
+                    errorAggregator.getErrorList().add(new StyleError(StyleError.StyleCheckSection.APIInfo, "server", "Invalid server url format:" + url));
+                }
+            });
+        }
     }
 
     private void validateInfo() {
@@ -75,6 +115,7 @@ public class OpenApiSpecStyleValidator {
     }
 
     private void validateOperations() {
+        Set<String> usedOperationIds = new HashSet<>();
         for (String key : openAPI.getPaths().getPathItems().keySet()) {
             PathItem path = openAPI.getPaths().getPathItems().get(key);
             for (PathItem.HttpMethod method : path.getOperations().keySet()) {
@@ -82,6 +123,15 @@ public class OpenApiSpecStyleValidator {
                 if (parameters.isValidateOperationOperationId()) {
                     if (op.getOperationId() == null || op.getOperationId().isEmpty()) {
                         errorAggregator.logMissingOrEmptyOperationAttribute(key, method, "operationId");
+                    }
+                }
+
+                if(parameters.isValidateOperationOperationIdUnique()){
+                    if(usedOperationIds.contains(op.getOperationId())){
+                        errorAggregator.logOperationNonUniqueNaming("operationId", op.getOperationId(), key, method);
+                    }
+                    else{
+                        usedOperationIds.add(op.getOperationId());
                     }
                 }
 
